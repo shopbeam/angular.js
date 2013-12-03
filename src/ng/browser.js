@@ -119,6 +119,15 @@ function Browser(window, document, $log, $sniffer) {
     })();
   }
 
+  var sourcelessIFrame = false;
+  try {
+    if (!(window.top === window) && (window.top.location.href === window.location.href)) sourcelessIFrame = true;
+  } catch (err) {
+    //probably cross domain iframe
+    console.error('This is proably just a cross-domain iframe attempting to access window.top.location', err);
+  }
+  this.sourcelessIFrame = sourcelessIFrame;
+
   //////////////////////////////////////////////////////////////
   // URL API
   //////////////////////////////////////////////////////////////
@@ -149,7 +158,13 @@ function Browser(window, document, $log, $sniffer) {
   self.url = function(url, replace) {
     // setter
     if (url) {
-      if (lastBrowserUrl == url) return;
+      /**
+       * TODO: move the check for sourcelessIFrame to the else of `$sniffer.history` as it would be nice to have to have 
+       *    replaceState/pushState support for sourceless iframes. This requires modifications however to the $locationWatch
+       *    watch expression which I'm not yet prepared to do.
+       */
+      
+      if (lastBrowserUrl == url || sourcelessIFrame) return;
       lastBrowserUrl = url;
       if ($sniffer.history) {
         if (replace) history.replaceState(null, '', url);

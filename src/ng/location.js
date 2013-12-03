@@ -594,6 +594,8 @@ function $LocationProvider(){
     // update browser
     var changeCounter = 0;
     $rootScope.$watch(function $locationWatch() {
+      if ($browser.sourcelessIFrame) return;
+      
       var oldUrl = $browser.url();
       var currentReplace = $location.$$replace;
 
